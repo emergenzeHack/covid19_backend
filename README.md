@@ -16,6 +16,7 @@ Moduli già attivi:
 - [Segnala Iniziative culturali e ricreative](https://ee.humanitarianresponse.info/x/#jdqjUBQV)
 - [Segnala Iniziative solidali](https://ee.humanitarianresponse.info/x/#NsdBTg2O)
 - [Segnala e-learning/didattica a distanza](https://ee.humanitarianresponse.info/x/#YJuj2y4k)
+- [Segnala Notizia](https://ee.humanitarianresponse.info/x/#Vde7ElAa)
 
 
 ## backend
