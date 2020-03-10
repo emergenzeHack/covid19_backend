@@ -7,7 +7,7 @@ Form in XLSform hostati su https://kobo.humanitarianresponse.info
 Moduli già attivi:
 
 - [Chiedi Aiuto](https://ee.humanitarianresponse.info/x/#aozLp5mz)
-
+- [Segnala contatti utili](https://ee.humanitarianresponse.info/x/#TTWdM1cJ)
 
 ## backend
 
