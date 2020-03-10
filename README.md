@@ -9,6 +9,7 @@ Moduli già attivi:
 - [Chiedi Aiuto](https://ee.humanitarianresponse.info/x/#aozLp5mz)
 - [Segnala contatti utili](https://ee.humanitarianresponse.info/x/#TTWdM1cJ)
 - [Dona beni o servizi](https://ee.humanitarianresponse.info/x/#jc0dY8z7)
+- [Segnala Raccolta Fondi](https://ee.humanitarianresponse.info/x/#2glr4leb)
 
 ## backend
 
