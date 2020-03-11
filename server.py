@@ -21,6 +21,7 @@ def hello_world():
 
 @app.route('/report', methods=['POST'])
 def process_report():
+    labels = []
     payload = request.json
     stripped_payload = strip_meta(payload)
     yaml_payload = "```\n"+yaml.dump(stripped_payload)+"```"
@@ -51,7 +52,20 @@ def process_report():
         issue_title=payload["Descrizione"][0:50]
     else:
         issue_title=label
-    open_github_issue(title=issue_title, body=yaml_payload, labels=[label, "form"])
+
+    if "Titolo" in list(payload):
+        if "psicolog" in payload["Titolo"] or "psicoter" in payload["Titolo"]:
+                labels.append("Supporto Psicologico")
+        else:
+            if "Descrizione" in list(payload):
+                if "psicolog" in payload["Descrizione"] or "psicoter" in payload["Descrizione"]:
+                    labels.append("Supporto Psicologico")
+
+
+    labels.append("form")
+    labels.append(label)
+
+    open_github_issue(title=issue_title, body=yaml_payload, labels=labels)
     return "OK", 200
 
 def strip_meta(payload):
