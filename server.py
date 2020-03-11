@@ -25,7 +25,25 @@ def process_report():
     yaml_payload = "```\n"+yaml.dump(stripped_payload)+"```"
     print(yaml_payload)
     label=request.headers.get('label')
-    if "cosa" in list(payload):
+    if label == "iniziativa":
+        if "natura" in list(payload):
+            if payload["natura"] == "culturale-ricr":
+                label = "Attivita culturali e ricreative"
+            elif payload["natura"] == "solidale":
+                label = "Servizi e iniziative solidali "
+                if "Tipo_di_soggetto" in list(payload):
+                    if payload["Tipo_di_soggetto"] == "privato":
+                        label += "private"
+                    else:
+                        label += "pubbliche"
+                
+            elif payload["natura"] == "didattica":
+                label = "Didattica a distanza e-learning"
+            elif payload["natura"] == "sostegno-lavor":
+                label = "Sostegno lavoro e imprese"
+    if "titolo" in list(payload):
+        issue_title=payload["titolo"][0:50]
+    elif "cosa" in list(payload):
         issue_title=payload["cosa"][0:50]
     elif "testo" in list(payload):
         issue_title=payload["testo"][0:50]
