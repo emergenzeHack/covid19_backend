@@ -1,13 +1,14 @@
 from flask import Flask, request
 import requests
 import yaml, json
+import credentials
 
 app = Flask(__name__)
 
 # Authentication for user filing issue (must have read/write access to
 # repository to add issue to)
-USERNAME = ''
-PASSWORD = ''
+USERNAME = credentials.user
+PASSWORD = credentials.password
 
 # The repository to add this issue to
 REPO_OWNER = 'emergenzeHack'
@@ -41,14 +42,14 @@ def process_report():
                 label = "Didattica a distanza e-learning"
             elif payload["natura"] == "sostegno-lavor":
                 label = "Sostegno lavoro e imprese"
-    if "titolo" in list(payload):
-        issue_title=payload["titolo"][0:50]
-    elif "cosa" in list(payload):
-        issue_title=payload["cosa"][0:50]
-    elif "testo" in list(payload):
-        issue_title=payload["testo"][0:50]
-    elif "descrizione" in list(payload):
-        issue_title=payload["descrizione"][0:50]
+    if "Titolo" in list(payload):
+        issue_title=payload["Titolo"][0:50]
+    elif "Cosa" in list(payload):
+        issue_title=payload["Cosa"][0:50]
+    elif "Testo" in list(payload):
+        issue_title=payload["Testo"][0:50]
+    elif "Descrizione" in list(payload):
+        issue_title=payload["Descrizione"][0:50]
     else:
         issue_title=label
     open_github_issue(title=issue_title, body=yaml_payload, labels=[label, "form"])
