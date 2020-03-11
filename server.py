@@ -24,7 +24,7 @@ def process_report():
     labels = []
     payload = request.json
     stripped_payload = strip_meta(payload)
-    yaml_payload = "```\n"+yaml.dump(stripped_payload)+"```"
+    yaml_payload = "<pre><yamldata>\n"+yaml.dump(stripped_payload)+"\n</yamldata></pre>"
     print(yaml_payload)
     label=request.headers.get('label')
     if label == "iniziativa":
