@@ -1,0 +1,86 @@
+<?xml version="1.0"?>
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa" xmlns:odk="http://www.opendatakit.org/xforms" xmlns:orx="http://openrosa.org/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <h:head>
+    <h:title>Segnala Iniziative e Servizi</h:title>
+    <model>
+      <instance>
+        <data id="snapshot_xml">
+          <start/>
+          <end/>
+          <Natura/>
+          <Da_chi_offerta/>
+          <Tipo_di_soggetto/>
+          <Titolo/>
+          <Destinatari/>
+          <Descrizione/>
+          <Posizione/>
+          <Link/>
+          <meta>
+            <instanceID/>
+          </meta>
+        </data>
+      </instance>
+      <bind jr:preload="timestamp" jr:preloadParams="start" nodeset="/data/start" type="dateTime"/>
+      <bind jr:preload="timestamp" jr:preloadParams="end" nodeset="/data/end" type="dateTime"/>
+      <bind nodeset="/data/Natura" required="false()" type="select1"/>
+      <bind nodeset="/data/Da_chi_offerta" required="false()" type="string"/>
+      <bind nodeset="/data/Tipo_di_soggetto" relevant=" /data/Natura  = 'solidale'" required="false()" type="select1"/>
+      <bind nodeset="/data/Titolo" required="false()" type="string"/>
+      <bind nodeset="/data/Destinatari" required="false()" type="string"/>
+      <bind nodeset="/data/Descrizione" required="false()" type="string"/>
+      <bind nodeset="/data/Posizione" required="false()" type="geopoint"/>
+      <bind nodeset="/data/Link" required="false()" type="string"/>
+      <bind calculate="concat('uuid:', uuid())" nodeset="/data/meta/instanceID" readonly="true()" type="string"/>
+    </model>
+  </h:head>
+  <h:body>
+    <select1 ref="/data/Natura">
+      <label>Natura dell'iniziativa</label>
+      <item>
+        <label>Ricreativa/culturale</label>
+        <value>culturale-ricr</value>
+      </item>
+      <item>
+        <label>Solidale</label>
+        <value>solidale</value>
+      </item>
+      <item>
+        <label>Didattica (E-Learning)</label>
+        <value>didattica</value>
+      </item>
+      <item>
+        <label>Sostegno lavoro e imprese</label>
+        <value>sostegno-lavor</value>
+      </item>
+    </select1>
+    <input ref="/data/Da_chi_offerta">
+      <label>Da chi è offerta?</label>
+    </input>
+    <select1 ref="/data/Tipo_di_soggetto">
+      <label>Tipo di soggetto</label>
+      <item>
+        <label>Privato</label>
+        <value>privato</value>
+      </item>
+      <item>
+        <label>Pubblico</label>
+        <value>pubblico</value>
+      </item>
+    </select1>
+    <input ref="/data/Titolo">
+      <label>Titolo</label>
+    </input>
+    <input ref="/data/Destinatari">
+      <label>Destinatari</label>
+    </input>
+    <input appearance="multiline" ref="/data/Descrizione">
+      <label>Descrizione</label>
+    </input>
+    <input ref="/data/Posizione">
+      <label>Posizione</label>
+    </input>
+    <input ref="/data/Link">
+      <label>Link</label>
+    </input>
+  </h:body>
+</h:html>
