@@ -7,15 +7,11 @@ Form in XLSform hostati su https://kobo.humanitarianresponse.info
 Moduli già attivi:
 
 - [Chiedi Aiuto](https://ee.humanitarianresponse.info/x/#aozLp5mz)
-- [Segnala contatti utili](https://ee.humanitarianresponse.info/x/#TTWdM1cJ)
 - [Dona beni o servizi](https://ee.humanitarianresponse.info/x/#jc0dY8z7)
-- [Segnala Raccolta Fondi](https://ee.humanitarianresponse.info/x/#2glr4leb)
+- [Segnala Iniziativa](https://ee.humanitarianresponse.info/x/#6KafBk33)
+- [Segnala contatti utili](https://ee.humanitarianresponse.info/x/#TTWdM1cJ)
 - [Segnala Bufala](https://ee.humanitarianresponse.info/x/#ecZ2zzjJ)
-- [Segnala Smart working](https://ee.humanitarianresponse.info/x/#I63unfno)
 - [Segnala Dati ufficiali](https://ee.humanitarianresponse.info/x/#hy7sHGP3)
-- [Segnala Iniziative culturali e ricreative](https://ee.humanitarianresponse.info/x/#jdqjUBQV)
-- [Segnala Iniziative solidali](https://ee.humanitarianresponse.info/x/#NsdBTg2O)
-- [Segnala e-learning/didattica a distanza](https://ee.humanitarianresponse.info/x/#YJuj2y4k)
 - [Segnala Notizia](https://ee.humanitarianresponse.info/x/#Vde7ElAa)
 
 
