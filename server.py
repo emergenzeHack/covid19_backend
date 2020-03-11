@@ -54,11 +54,11 @@ def process_report():
         issue_title=label
 
     if "Titolo" in list(payload):
-        if "psicolog" in payload["Titolo"] or "psicoter" in payload["Titolo"]:
+        if "psicolog" in payload["Titolo"].lower() or "psicoter" in payload["Titolo"].lower():
                 labels.append("Supporto Psicologico")
         else:
             if "Descrizione" in list(payload):
-                if "psicolog" in payload["Descrizione"] or "psicoter" in payload["Descrizione"]:
+                if "psicolog" in payload["Descrizione"].lower() or "psicoter" in payload["Descrizione"].lower():
                     labels.append("Supporto Psicologico")
 
 
