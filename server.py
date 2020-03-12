@@ -27,18 +27,20 @@ def process_report():
     # Rimuovi metavalori
     stripped_payload = strip_meta(payload)
 
+    # Rimuovi nome gruppo dal nome delle chiavi
+    # e.g. datibancari/iban -> datibancari
+    for key_name in list(payload):
+        print(key_name)
+        if "datibancari/" in key_name:
+            print("matched")
+            new_key_name = key_name.replace("datibancari/","")
+            payload[new_key_name] = payload[key_name]
+            payload.pop(key_name)
+    
     # Prepara il payload in YAML
     yaml_payload = "<pre><yamldata>\n"+yaml.dump(stripped_payload)+"\n</yamldata></pre>"
 
     label=request.headers.get('label')
-
-    # Rimuovi nome gruppo dal nome delle chiavi
-    # e.g. datibancari/iban -> datibancari
-    for key_name in list(payload):
-        if "datibancari/" in key_name:
-            new_key_name = key_name.replace("datibancari/","")
-            payload[new_key_name] = payload[key_name]
-            payload.pop(key_name)
 
     if label == "iniziativa":
         print("Iniziativa")
