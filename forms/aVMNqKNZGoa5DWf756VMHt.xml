@@ -1,0 +1,66 @@
+<?xml version="1.0"?>
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa" xmlns:odk="http://www.opendatakit.org/xforms" xmlns:orx="http://openrosa.org/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <h:head>
+    <h:title>Segnala notizia</h:title>
+    <model>
+      <itext>
+        <translation default="true()" lang="Italian (it_IT)">
+          <text id="/data/Descrizione:label">
+            <value>Descrizione</value>
+          </text>
+          <text id="/data/Informativa:label">
+            <value>[Leggi l'informativa trattamento dati personali](https://www.covid19italia.info/legal_segnalazioni/)</value>
+          </text>
+          <text id="/data/Cosa:label">
+            <value>Titolo &lt;span style="font-size: 9.5px"&gt;(campo obbligatorio)&lt;/span&gt;</value>
+          </text>
+          <text id="/data/Link:label">
+            <value>Link &lt;span style="font-size: 9.5px"&gt;(es: https://www.google.it)&lt;/span&gt;</value>
+          </text>
+          <text id="/data/Posizione:label">
+            <value>Posizione</value>
+          </text>
+        </translation>
+      </itext>
+      <instance>
+        <data id="snapshot_xml">
+          <start/>
+          <end/>
+          <Cosa/>
+          <Descrizione/>
+          <Posizione/>
+          <Link/>
+          <Informativa/>
+          <meta>
+            <instanceID/>
+          </meta>
+        </data>
+      </instance>
+      <bind jr:preload="timestamp" jr:preloadParams="start" nodeset="/data/start" type="dateTime"/>
+      <bind jr:preload="timestamp" jr:preloadParams="end" nodeset="/data/end" type="dateTime"/>
+      <bind nodeset="/data/Cosa" required="true()" type="string"/>
+      <bind nodeset="/data/Descrizione" required="false()" type="string"/>
+      <bind nodeset="/data/Posizione" required="false()" type="geopoint"/>
+      <bind constraint="regex(.,'^((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&amp;=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&amp;=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&amp;;%@.\w_]*)#?(?:[\w]*))?)$')" jr:constraintMsg="Per favore inserisci un link valido" nodeset="/data/Link" required="false()" type="string"/>
+      <bind nodeset="/data/Informativa" readonly="true()" required="false()" type="string"/>
+      <bind calculate="concat('uuid:', uuid())" nodeset="/data/meta/instanceID" readonly="true()" type="string"/>
+    </model>
+  </h:head>
+  <h:body>
+    <input ref="/data/Cosa">
+      <label ref="jr:itext('/data/Cosa:label')"/>
+    </input>
+    <input appearance="multiline" ref="/data/Descrizione">
+      <label ref="jr:itext('/data/Descrizione:label')"/>
+    </input>
+    <input appearance="maps" ref="/data/Posizione">
+      <label ref="jr:itext('/data/Posizione:label')"/>
+    </input>
+    <input ref="/data/Link">
+      <label ref="jr:itext('/data/Link:label')"/>
+    </input>
+    <input ref="/data/Informativa">
+      <label ref="jr:itext('/data/Informativa:label')"/>
+    </input>
+  </h:body>
+</h:html>
