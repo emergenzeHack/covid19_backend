@@ -1,0 +1,123 @@
+<?xml version="1.0"?>
+<h:html xmlns="http://www.w3.org/2002/xforms" xmlns:ev="http://www.w3.org/2001/xml-events" xmlns:h="http://www.w3.org/1999/xhtml" xmlns:jr="http://openrosa.org/javarosa" xmlns:odk="http://www.opendatakit.org/xforms" xmlns:orx="http://openrosa.org/xforms" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <h:head>
+    <h:title>Segnala raccolta fondi</h:title>
+    <model>
+      <itext>
+        <translation default="true()" lang="Italian (it_IT)">
+          <text id="/data/datibancari/BIC_SWIFT:label">
+            <value>BIC SWIFT</value>
+          </text>
+          <text id="/data/datibancari/CC_Postale:label">
+            <value>CC Postale</value>
+          </text>
+          <text id="/data/Descrizione:label">
+            <value>Descrizione</value>
+          </text>
+          <text id="/data/datibancari:label">
+            <value>Dati bancari</value>
+          </text>
+          <text id="/data/Informativa:label">
+            <value>[Leggi l'informativa trattamento dati personali](https://www.covid19italia.info/legal_segnalazioni/)</value>
+          </text>
+          <text id="/data/datibancari/Causale:label">
+            <value>Causale</value>
+          </text>
+          <text id="/data/datibancari/IBAN:label">
+            <value>IBAN</value>
+          </text>
+          <text id="/data/Link:label">
+            <value>Link &lt;span style="font-size: 9.5px"&gt;(es: https://www.google.it)&lt;/span&gt;</value>
+          </text>
+          <text id="/data/Posizione:label">
+            <value>Posizione</value>
+          </text>
+          <text id="/data/Email:label">
+            <value>E-mail</value>
+          </text>
+          <text id="/data/Nome:label">
+            <value>Chi richiede la donazione &lt;span style="font-size:9.5px"&gt;(campo obbligatorio)&lt;/span&gt;</value>
+          </text>
+          <text id="/data/datibancari/Intestazione:label">
+            <value>Intestazione</value>
+          </text>
+        </translation>
+      </itext>
+      <instance>
+        <data id="snapshot_xml">
+          <start/>
+          <end/>
+          <Nome/>
+          <Descrizione/>
+          <datibancari>
+            <Intestazione/>
+            <IBAN/>
+            <BIC_SWIFT/>
+            <CC_Postale/>
+            <Causale/>
+          </datibancari>
+          <Posizione/>
+          <Link/>
+          <Email/>
+          <Informativa/>
+          <meta>
+            <instanceID/>
+          </meta>
+        </data>
+      </instance>
+      <bind jr:preload="timestamp" jr:preloadParams="start" nodeset="/data/start" type="dateTime"/>
+      <bind jr:preload="timestamp" jr:preloadParams="end" nodeset="/data/end" type="dateTime"/>
+      <bind nodeset="/data/Nome" required="true()" type="string"/>
+      <bind nodeset="/data/Descrizione" required="false()" type="string"/>
+      <bind nodeset="/data/datibancari" required="false()"/>
+      <bind nodeset="/data/datibancari/Intestazione" required="false()" type="string"/>
+      <bind nodeset="/data/datibancari/IBAN" required="false()" type="string"/>
+      <bind nodeset="/data/datibancari/BIC_SWIFT" required="false()" type="string"/>
+      <bind nodeset="/data/datibancari/CC_Postale" required="false()" type="string"/>
+      <bind nodeset="/data/datibancari/Causale" required="false()" type="string"/>
+      <bind nodeset="/data/Posizione" required="false()" type="geopoint"/>
+      <bind constraint="regex(.,'^((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&amp;=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&amp;=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&amp;;%@.\w_]*)#?(?:[\w]*))?)$')" jr:constraintMsg="Per favore inserisci un link valido" nodeset="/data/Link" required="false()" type="string"/>
+      <bind constraint="regex(.,'^[\w-]+@([\w-]+\.)+[\w-]+$')" jr:constraintMsg="Per favore inserisci un email valido" nodeset="/data/Email" required="false()" type="string"/>
+      <bind nodeset="/data/Informativa" readonly="true()" required="false()" type="string"/>
+      <bind calculate="concat('uuid:', uuid())" nodeset="/data/meta/instanceID" readonly="true()" type="string"/>
+    </model>
+  </h:head>
+  <h:body>
+    <input ref="/data/Nome">
+      <label ref="jr:itext('/data/Nome:label')"/>
+    </input>
+    <input appearance="multiline" ref="/data/Descrizione">
+      <label ref="jr:itext('/data/Descrizione:label')"/>
+    </input>
+    <group ref="/data/datibancari">
+      <label ref="jr:itext('/data/datibancari:label')"/>
+      <input ref="/data/datibancari/Intestazione">
+        <label ref="jr:itext('/data/datibancari/Intestazione:label')"/>
+      </input>
+      <input ref="/data/datibancari/IBAN">
+        <label ref="jr:itext('/data/datibancari/IBAN:label')"/>
+      </input>
+      <input ref="/data/datibancari/BIC_SWIFT">
+        <label ref="jr:itext('/data/datibancari/BIC_SWIFT:label')"/>
+      </input>
+      <input ref="/data/datibancari/CC_Postale">
+        <label ref="jr:itext('/data/datibancari/CC_Postale:label')"/>
+      </input>
+      <input ref="/data/datibancari/Causale">
+        <label ref="jr:itext('/data/datibancari/Causale:label')"/>
+      </input>
+    </group>
+    <input appearance="maps" ref="/data/Posizione">
+      <label ref="jr:itext('/data/Posizione:label')"/>
+    </input>
+    <input ref="/data/Link">
+      <label ref="jr:itext('/data/Link:label')"/>
+    </input>
+    <input ref="/data/Email">
+      <label ref="jr:itext('/data/Email:label')"/>
+    </input>
+    <input ref="/data/Informativa">
+      <label ref="jr:itext('/data/Informativa:label')"/>
+    </input>
+  </h:body>
+</h:html>
