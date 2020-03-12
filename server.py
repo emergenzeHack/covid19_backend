@@ -60,13 +60,13 @@ def process_report():
             elif payload["Natura"] == "sostegno-lavor":
                 label = "Sostegno lavoro e imprese"
     if "Titolo" in list(payload):
-        issue_title=payload["Titolo"][0:50]
+        issue_title=payload["Titolo"][0:100]
     elif "Cosa" in list(payload):
-        issue_title=payload["Cosa"][0:50]
+        issue_title=payload["Cosa"][0:100]
     elif "Testo" in list(payload):
-        issue_title=payload["Testo"][0:50]
+        issue_title=payload["Testo"][0:100]
     elif "Descrizione" in list(payload):
-        issue_title=payload["Descrizione"][0:50]
+        issue_title=payload["Descrizione"][0:100]
     else:
         issue_title=label
 
