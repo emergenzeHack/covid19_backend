@@ -30,21 +30,17 @@ def process_report():
     # Rimuovi nome gruppo dal nome delle chiavi
     # e.g. datibancari/iban -> datibancari
     for key_name in list(payload):
-        print(key_name)
         if "datibancari/" in key_name:
-            print("matched")
             new_key_name = key_name.replace("datibancari/","")
             payload[new_key_name] = payload[key_name]
             payload.pop(key_name)
     
     # Prepara il payload in YAML
-    yaml_payload = "<pre><yamldata>\n"+yaml.dump(stripped_payload)+"\n</yamldata></pre>"
+    yaml_payload = "<pre><yamldata>\n"+yaml.dump(stripped_payload, allow_unicode=True)+"\n</yamldata></pre>"
 
     label=request.headers.get('label')
 
     if label == "iniziativa":
-        print("Iniziativa")
-        print("keys:",list(payload))
         if "Natura" in list(payload):
             if payload["Natura"] == "culturale-ricr":
                 label = "Attivita culturali e ricreative"
@@ -109,8 +105,10 @@ def open_github_issue(title, body=None, assignee=None, milestone=None, labels=[]
              'assignee': assignee,
              'milestone': milestone,
              'labels': labels}
+
     # Add the issue to our repository
     r = session.post(url, json.dumps(issue))
+    
     if r.status_code == 201:
         print('Successfully created Issue', title)
     else:
@@ -118,5 +116,4 @@ def open_github_issue(title, body=None, assignee=None, milestone=None, labels=[]
         print('Response:', r.content)
 
 
-#make_github_issue('Test')
 app.run(host='0.0.0.0');
