@@ -36,7 +36,7 @@ def process_report():
             payload.pop(key_name)
     
     # Prepara il payload in YAML
-    yaml_payload = "<pre><yamldata>\n"+yaml.dump(stripped_payload, allow_unicode=True)+"\n</yamldata></pre>"
+    yaml_payload = "<pre><yamldata>\n"+yaml.dump(stripped_payload, allow_unicode=True)+"</yamldata></pre>"
 
     label=request.headers.get('label')
 
