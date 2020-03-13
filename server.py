@@ -82,7 +82,7 @@ def process_report():
     return "OK", 200
 
 def strip_meta(payload):
-    excludelist = ["end", "start", "formhub/uuid", "meta/instanceID", "meta/deprecatedID"]
+    excludelist = ["end", "start", "formhub/uuid", "meta/instanceID", "meta/deprecatedID", "Informativa"]
     # Rimuovi tutti i campi meta che iniziano con _
     for k in list(payload):
         if k.startswith('_'):
