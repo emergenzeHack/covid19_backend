@@ -16,8 +16,8 @@ REPO_NAME = 'covid19italia_segnalazioni'
 
 
 @app.route('/')
-def hello_world():
-    return 'Hello, World!'
+def paynoattention():
+    return 'Pay no attention to that man behind the curtain.'
 
 @app.route('/report', methods=['POST'])
 def process_report():
@@ -40,6 +40,7 @@ def process_report():
 
     label=request.headers.get('label')
 
+    # Assegna le label in base alle selezioni sul form "Iniziative"
     if label == "iniziativa":
         if "Natura" in list(payload):
             if payload["Natura"] == "culturale-ricr":
@@ -55,6 +56,8 @@ def process_report():
                 label = "Didattica a distanza e-learning"
             elif payload["Natura"] == "sostegno-lavor":
                 label = "Sostegno lavoro e imprese"
+
+    # Prepara il titolo dell'Issue
     if "Titolo" in list(payload):
         issue_title=payload["Titolo"][0:100]
     elif "Cosa" in list(payload):
@@ -66,6 +69,8 @@ def process_report():
     else:
         issue_title=label
 
+    # Se trovi riferimenti a psicologi o psicoterapeuti, 
+    #  aggiungi la label "Supporto Psicologico"
     if "Titolo" in list(payload):
         if "psicolog" in payload["Titolo"].lower() or "psicoter" in payload["Titolo"].lower():
                 labels.append("Supporto Psicologico")
@@ -74,10 +79,11 @@ def process_report():
                 if "psicolog" in payload["Descrizione"].lower() or "psicoter" in payload["Descrizione"].lower():
                     labels.append("Supporto Psicologico")
 
-
+    # Aggiungi sempre la label "form" per le issue provenienti da questo script
     labels.append("form")
+    # Aggiungi le label preparate
     labels.append(label)
-
+    # Apri issue su GitHub
     open_github_issue(title=issue_title, body=yaml_payload, labels=labels)
     return "OK", 200
 
