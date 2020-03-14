@@ -88,6 +88,8 @@ def process_report():
         location = False
         if "Titolo" in list(payload):
             location = extract_location(payload["Titolo"])
+        elif "Da_chi_offerta" in list(payload):
+            location = extract_location(payload["Da_chi_offerta"])
         elif "Cosa" in list(payload) and not location:
             location = extract_location(payload["Cosa"])
         elif "Testo" in list(payload) and not location:
