@@ -25,6 +25,10 @@ def paynoattention():
 
 @app.route('/report', methods=['POST'])
 def process_report():
+    # Create an authenticated session to create the issue
+    session = requests.Session()
+    session.auth = (USERNAME, PASSWORD)
+
     labels = []
     payload = request.json
 
@@ -78,6 +82,7 @@ def process_report():
                     labels.append("Supporto Psicologico")
     
     location = False
+    comment_body = None
 
     if "Indirizzo" not in list(payload) and "Posizione" not in list(payload):
         location = False
@@ -94,6 +99,11 @@ def process_report():
 
     if location:
         payload["Indirizzo"] = location
+        coords = location.split(" ")
+        comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s come coordinate. Per favore, controlla <a href='%s%s'>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>" % (location, coords[0], coords[1])
+        comment_body = {
+            "body": comment_message
+        }
         labels.append("Posizione da verificare")
 
     # Aggiungi sempre la label "form" per le issue provenienti da questo script
@@ -108,7 +118,10 @@ def process_report():
     yaml_payload = "<pre><yamldata>\n"+yaml.dump(stripped_payload, allow_unicode=True)+"</yamldata></pre>"
 
     # Apri issue su GitHub
-    open_github_issue(title=issue_title, body=yaml_payload, labels=labels)
+    comment_url = open_github_issue(session, title=issue_title, body=yaml_payload, labels=labels)
+    
+    if comment_body:
+        add_comment(session, url=comment_url, body=comment_body)
 
     return "OK", 200
 
@@ -125,7 +138,7 @@ def strip_meta(payload):
 
 def extract_location(text):
     for comune in italy_geo:
-        if len(comune["comune"]) > 3 and comune["comune"] in text:
+        if len(comune["comune"]) > 3 and comune["comune"].lower() in text.lower():
             print("Trovato riferimento a comune", comune["comune"])
             location = comune["lat"] + " " + comune["lng"]
             print("Aggiungo", location)
@@ -133,25 +146,37 @@ def extract_location(text):
 
     return False
 
-def open_github_issue(title, body=None, assignee=None, milestone=None, labels=[]):
+def add_comment(session, url, body):
+    r = session.post(url, json.dumps(body))
+    if r.status_code == 201:
+        print('Successfully created Comment on Issue')
+
+    else:
+        print('Could not create Comment', title)
+        print('Response:', r.content)
+
+
+def open_github_issue(session, title, body=None, assignee=None, milestone=None, labels=[]):
     '''Create an issue on github.com using the given parameters.'''
-    # Our url to create issues via POST
-    url = 'https://api.github.com/repos/%s/%s/issues' % (REPO_OWNER, REPO_NAME)
-    # Create an authenticated session to create the issue
-    session = requests.Session()
-    session.auth = (USERNAME, PASSWORD)
+
     # Create our issue
     issue = {'title': title,
              'body': body,
              'assignee': assignee,
              'milestone': milestone,
              'labels': labels}
-
+    
+    # Our url to create issues via POST
+    url = 'https://api.github.com/repos/%s/%s/issues' % (REPO_OWNER, REPO_NAME)
+    
     # Add the issue to our repository
     r = session.post(url, json.dumps(issue))
     
     if r.status_code == 201:
         print('Successfully created Issue', title)
+        response = r.json()
+        return response["comments_url"]
+
     else:
         print('Could not create Issue', title)
         print('Response:', r.content)
