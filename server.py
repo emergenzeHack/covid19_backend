@@ -100,7 +100,7 @@ def process_report():
     if location:
         payload["Indirizzo"] = location
         coords = location.split(" ")
-        comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s come coordinate. Per favore, controlla <a href='%s%s'>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>" % (location, coords[0], coords[1])
+        comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s come coordinate. Per favore, controlla <a href='https://nominatim.openstreetmap.org/search.php?q=%s+%s&polygon_geojson=1&viewbox='>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>." % (location, coords[0], coords[1])
         comment_body = {
             "body": comment_message
         }
