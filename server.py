@@ -98,9 +98,9 @@ def process_report():
             labels.append("Posizione mancante")
 
     if location:
-        payload["Indirizzo"] = location
-        coords = location.split(" ")
-        comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s come coordinate. Per favore, controlla <a href='https://nominatim.openstreetmap.org/search.php?q=%s+%s&polygon_geojson=1&viewbox='>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>." % (location, coords[0], coords[1])
+        payload["Indirizzo"] = location[0]
+        coords = location[0].split(" ")
+        comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s (%s) come coordinate. Per favore, controlla <a href='https://nominatim.openstreetmap.org/search.php?q=%s+%s&polygon_geojson=1&viewbox='>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>." % (location[0], location[1], coords[0], coords[1])
         comment_body = {
             "body": comment_message
         }
@@ -142,7 +142,7 @@ def extract_location(text):
             print("Trovato riferimento a comune", comune["comune"])
             location = comune["lat"] + " " + comune["lng"]
             print("Aggiungo", location)
-            return location
+            return [location, comune["comune"]]
 
     return False
 
