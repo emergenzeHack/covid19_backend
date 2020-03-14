@@ -5,7 +5,12 @@ import credentials
 import re
 
 with open('italy_geo.json') as f:
-  italy_geo = json.load(f)
+    italy_geo = json.load(f)
+
+with open('comuni.json') as f:
+    comuni = json.load(f)
+
+comuni = sorted(comuni, key=lambda k: k['popolazione'], reverse=True)
 
 app = Flask(__name__)
 
@@ -84,6 +89,7 @@ def process_report():
     location = False
     comment_body = None
 
+    # Suggerisci una posizione
     if "Indirizzo" not in list(payload) and "Posizione" not in list(payload):
         location = False
         if "Titolo" in list(payload):
@@ -99,6 +105,7 @@ def process_report():
         if not location:
             labels.append("Posizione mancante")
 
+    # Commenta con il suggerimento
     if location:
         payload["Indirizzo"] = location[0]
         coords = location[0].split(" ")
@@ -139,12 +146,14 @@ def strip_meta(payload):
     return payload
 
 def extract_location(text):
-    for comune in italy_geo:
-        if len(comune["comune"]) > 3 and " %s" % (comune["comune"].lower()) in text.lower():
-            print("Trovato riferimento a comune", comune["comune"])
-            location = comune["lat"] + " " + comune["lng"]
-            print("Aggiungo", location)
-            return [location, comune["comune"]]
+    for comune in comuni:
+        if len(comune["nome"]) > 3 and "%s" % (comune["nome"].lower()) in text.lower():
+            for com_geo in italy_geo:
+                if com_geo["comune"].lower() == comune["nome"].lower():
+                    print("Trovato riferimento a comune", comune["nome"])
+                    location = com_geo["lat"] + " " + com_geo["lng"]
+                    print("Aggiungo", location)
+                    return [location, comune["nome"]]
 
     return False
 
