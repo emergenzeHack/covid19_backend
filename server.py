@@ -2,6 +2,10 @@ from flask import Flask, request
 import requests
 import yaml, json
 import credentials
+import re
+
+with open('italy_geo.json') as f:
+  italy_geo = json.load(f)
 
 app = Flask(__name__)
 
@@ -23,9 +27,6 @@ def paynoattention():
 def process_report():
     labels = []
     payload = request.json
-    
-    # Rimuovi metavalori
-    stripped_payload = strip_meta(payload)
 
     # Rimuovi nome gruppo dal nome delle chiavi
     # e.g. datibancari/iban -> datibancari
@@ -34,9 +35,6 @@ def process_report():
             new_key_name = key_name.replace("datibancari/","")
             payload[new_key_name] = payload[key_name]
             payload.pop(key_name)
-    
-    # Prepara il payload in YAML
-    yaml_payload = "<pre><yamldata>\n"+yaml.dump(stripped_payload, allow_unicode=True)+"</yamldata></pre>"
 
     label=request.headers.get('label')
 
@@ -78,13 +76,40 @@ def process_report():
             if "Descrizione" in list(payload):
                 if "psicolog" in payload["Descrizione"].lower() or "psicoter" in payload["Descrizione"].lower():
                     labels.append("Supporto Psicologico")
+    
+    location = False
+
+    if "Indirizzo" not in list(payload) and "Posizione" not in list(payload):
+        location = False
+        if "Titolo" in list(payload):
+            location = extract_location(payload["Titolo"])
+        elif "Cosa" in list(payload) and not location:
+            location = extract_location(payload["Cosa"])
+        elif "Testo" in list(payload) and not location:
+            location = extract_location(payload["Testo"])
+        elif "Descrizione" in list(payload) and not location:
+            location = extract_location(payload["Descrizione"])
+        if not location:
+            labels.append("Posizione mancante")
+
+    if location:
+        payload["Indirizzo"] = location
+        labels.append("Posizione da verificare")
 
     # Aggiungi sempre la label "form" per le issue provenienti da questo script
     labels.append("form")
     # Aggiungi le label preparate
     labels.append(label)
+
+    # Rimuovi metavalori
+    stripped_payload = strip_meta(payload)
+
+    # Prepara il payload in YAML
+    yaml_payload = "<pre><yamldata>\n"+yaml.dump(stripped_payload, allow_unicode=True)+"</yamldata></pre>"
+
     # Apri issue su GitHub
     open_github_issue(title=issue_title, body=yaml_payload, labels=labels)
+
     return "OK", 200
 
 def strip_meta(payload):
@@ -97,6 +122,16 @@ def strip_meta(payload):
         elif k in excludelist:
             payload.pop(k)
     return payload
+
+def extract_location(text):
+    for comune in italy_geo:
+        if len(comune["comune"]) > 3 and comune["comune"] in text:
+            print("Trovato riferimento a comune", comune["comune"])
+            location = comune["lat"] + " " + comune["lng"]
+            print("Aggiungo", location)
+            return location
+
+    return False
 
 def open_github_issue(title, body=None, assignee=None, milestone=None, labels=[]):
     '''Create an issue on github.com using the given parameters.'''
