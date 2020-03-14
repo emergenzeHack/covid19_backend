@@ -138,7 +138,7 @@ def strip_meta(payload):
 
 def extract_location(text):
     for comune in italy_geo:
-        if len(comune["comune"]) > 3 and comune["comune"].lower() in text.lower():
+        if len(comune["comune"]) > 3 and " %s" % (comune["comune"].lower()) in text.lower():
             print("Trovato riferimento a comune", comune["comune"])
             location = comune["lat"] + " " + comune["lng"]
             print("Aggiungo", location)
