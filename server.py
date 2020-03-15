@@ -146,7 +146,7 @@ def strip_meta(payload):
     return payload
 
 def extract_location(text):
-    for comune in comuni:
+    for comune in comuni[0:150]:
         if len(comune["nome"]) > 3 and "%s" % (comune["nome"].lower()) in text.lower():
             for com_geo in italy_geo:
                 if com_geo["comune"].lower() == comune["nome"].lower():
