@@ -68,17 +68,17 @@
       <bind jr:preload="timestamp" jr:preloadParams="start" nodeset="/data/start" type="dateTime"/>
       <bind jr:preload="timestamp" jr:preloadParams="end" nodeset="/data/end" type="dateTime"/>
       <bind nodeset="/data/Nome" required="true()" type="string"/>
-      <bind nodeset="/data/Descrizione" required="false()" type="string"/>
+      <bind nodeset="/data/Descrizione" required="true()" type="string" maxlength="2000"/>
       <bind nodeset="/data/datibancari" required="false()"/>
       <bind nodeset="/data/datibancari/Intestazione" required="false()" type="string"/>
       <bind nodeset="/data/datibancari/IBAN" required="false()" type="string"/>
       <bind nodeset="/data/datibancari/BIC_SWIFT" required="false()" type="string"/>
       <bind nodeset="/data/datibancari/CC_Postale" required="false()" type="string"/>
-      <bind nodeset="/data/datibancari/Causale" required="false()" type="string"/>
+      <bind nodeset="/data/datibancari/Causale" required="true()" type="string"/>
       <bind nodeset="/data/Posizione" required="false()" type="geopoint"/>
-      <bind constraint="regex(.,'^((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&amp;=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&amp;=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&amp;;%@.\w_]*)#?(?:[\w]*))?)$')" jr:constraintMsg="Per favore inserisci un link valido" nodeset="/data/Link" required="false()" type="string"/>
-      <bind constraint="regex(.,'^[\w-]+@([\w-]+\.)+[\w-]+$')" jr:constraintMsg="Per favore inserisci un email valido" nodeset="/data/Email" required="false()" type="string"/>
-      <bind nodeset="/data/Informativa" readonly="true()" required="false()" type="string"/>
+      <bind constraint="regex(.,'^((([A-Za-z]{3,9}:(?:\/\/)?)(?:[-;:&amp;=\+\$,\w]+@)?[A-Za-z0-9.-]+|(?:www.|[-;:&amp;=\+\$,\w]+@)[A-Za-z0-9.-]+)((?:\/[\+~%\/.\w-_]*)?\??(?:[-\+=&amp;;%@.\w_]*)#?(?:[\w]*))?)$')" jr:constraintMsg="Per favore inserisci un link valido" nodeset="/data/Link" required="true()" type="string"/>
+      <bind constraint="regex(.,'^[\w-]+@([\w-]+\.)+[\w-]+$')" jr:constraintMsg="Per favore inserisci un email valido" nodeset="/data/Email" required="true()" type="string"/>
+      <bind nodeset="/data/Informativa" readonly="true()" required="true()" type="string"/>
       <bind calculate="concat('uuid:', uuid())" nodeset="/data/meta/instanceID" readonly="true()" type="string"/>
     </model>
   </h:head>
