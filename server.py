@@ -25,16 +25,23 @@ PASSWORD = credentials.password
 REPO_OWNER = 'emergenzeHack'
 REPO_NAME = 'covid19italia_segnalazioni'
 
+repo_names = {
+    'it': 'covid19italia_segnalazioni',
+    'pt': 'covid19pt_issues',
+    'gr': 'covid19gr_issues'
+}
+
 
 @app.route('/')
 def paynoattention():
-    return 'Pay no attention to that man behind the curtain.'
+    return 'Pay no attention to that man behind the curtain!'
 
 @app.route('/report', methods=['POST'])
 def report():
-    process_report(request.json, request.label.get('label'))
+    process_report(request.json, request.headers)
 
-def process_report(payload, label):
+def process_report(payload, headers):
+    print(headers["Label"])
     # Create an authenticated session to create the issue
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
@@ -50,7 +57,13 @@ def process_report(payload, label):
             payload[new_key_name] = payload[key_name]
             payload.pop(key_name)
 
-    #label=request.headers.get('label')
+    if 'label' in list(headers):
+        label = headers['label']
+
+    if 'country' in list(headers):
+        country = headers['country']
+    else:
+        country = 'it'
 
     # Assegna le label in base alle selezioni sul form "Iniziative"
     if label == "iniziativa":
@@ -161,7 +174,7 @@ def process_report(payload, label):
     yaml_payload = "<pre><yamldata>\n"+yaml.dump(stripped_payload, allow_unicode=True)+"</yamldata></pre>"
 
     # Apri issue su GitHub
-    comment_url = open_github_issue(session, title=issue_title, body=yaml_payload, labels=labels)
+    comment_url = open_github_issue(session, title=issue_title, body=yaml_payload, labels=labels, country=country)
     
     if comment_body:
         add_comment(session, url=comment_url, body=comment_body)
@@ -200,8 +213,7 @@ def add_comment(session, url, body):
         print('Could not create Comment', title)
         print('Response:', r.content)
 
-
-def open_github_issue(session, title, body=None, assignee=None, milestone=None, labels=[]):
+def open_github_issue(session, title, body=None, assignee=None, milestone=None, labels=[], country='it'):
     '''Create an issue on github.com using the given parameters.'''
 
     # Create our issue
@@ -212,7 +224,7 @@ def open_github_issue(session, title, body=None, assignee=None, milestone=None, 
              'labels': labels}
     
     # Our url to create issues via POST
-    url = 'https://api.github.com/repos/%s/%s/issues' % (REPO_OWNER, REPO_NAME)
+    url = 'https://api.github.com/repos/%s/%s/issues' % (REPO_OWNER, repo_names[country])
     
     # Add the issue to our repository
     r = session.post(url, json.dumps(issue))
@@ -227,4 +239,4 @@ def open_github_issue(session, title, body=None, assignee=None, milestone=None, 
         print('Response:', r.content)
 
 
-#app.run(host='0.0.0.0');
+app.run(host='0.0.0.0');
