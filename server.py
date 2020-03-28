@@ -3,6 +3,8 @@ import requests
 import yaml, json
 import credentials
 import re
+from geopy.geocoders import Nominatim
+geolocator = Nominatim(user_agent="Covid19Italia.help")
 
 with open('italy_geo.json') as f:
     italy_geo = json.load(f)
@@ -29,13 +31,16 @@ def paynoattention():
     return 'Pay no attention to that man behind the curtain.'
 
 @app.route('/report', methods=['POST'])
-def process_report():
+def report():
+    process_report(request.json, request.label.get('label'))
+
+def process_report(payload, label):
     # Create an authenticated session to create the issue
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
 
     labels = []
-    payload = request.json
+    #payload = request.json
 
     # Rimuovi nome gruppo dal nome delle chiavi
     # e.g. datibancari/iban -> datibancari
@@ -45,7 +50,7 @@ def process_report():
             payload[new_key_name] = payload[key_name]
             payload.pop(key_name)
 
-    label=request.headers.get('label')
+    #label=request.headers.get('label')
 
     # Assegna le label in base alle selezioni sul form "Iniziative"
     if label == "iniziativa":
@@ -65,7 +70,9 @@ def process_report():
                 label = "Sostegno lavoro e imprese"
 
     # Prepara il titolo dell'Issue
-    if "Titolo" in list(payload):
+    if "Chi" in list(payload) and label == "Raccolte fondi":
+        issue_title = "Raccolta fondi %s" % (payload["Chi"])
+    elif "Titolo" in list(payload):
         issue_title=payload["Titolo"][0:100]
     elif "Cosa" in list(payload):
         issue_title=payload["Cosa"][0:100]
@@ -87,6 +94,7 @@ def process_report():
                     labels.append("Supporto Psicologico")
     
     location = False
+    location_geo = False
     comment_body = None
 
     # Suggerisci una posizione
@@ -102,8 +110,30 @@ def process_report():
             location = extract_location(payload["Testo"])
         elif "Descrizione" in list(payload) and not location:
             location = extract_location(payload["Descrizione"])
-        if not location:
-            labels.append("Posizione mancante")
+
+    if "Indirizzo" in list(payload) and "Posizione" not in list(payload):
+        location_geo = None
+        tries = 0
+        while location_geo is None:
+            tries += 1
+            if tries < 10:
+                try:
+                    print("Getting coordinates. (%s)" % (tries))
+                    location_geo = geolocator.geocode(payload["Indirizzo"])
+                except:
+                    pass
+            else:
+                location_geo = 0
+        if location_geo is not 0:
+            payload["Posizione"] = str(location_geo.latitude) +" "+str(location_geo.longitude)
+
+    if location_geo:
+        coords = payload["Posizione"].split(" ")
+        comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s (%s) come coordinate. Per favore, controlla <a href='https://nominatim.openstreetmap.org/search.php?q=%s+%s&polygon_geojson=1&viewbox='>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>." % (payload["Posizione"], payload["Indirizzo"], coords[0], coords[1])
+        comment_body = {
+            "body": comment_message
+        }
+        labels.append("Posizione da verificare")
 
     # Commenta con il suggerimento
     if location:
@@ -114,6 +144,10 @@ def process_report():
             "body": comment_message
         }
         labels.append("Posizione da verificare")
+
+    # Aggiungi label posizione mancante
+    if "Posizione" not in list(payload) and not location and not location_geo:
+        labels.append("Posizione mancante")
 
     # Aggiungi sempre la label "form" per le issue provenienti da questo script
     labels.append("form")
@@ -193,4 +227,4 @@ def open_github_issue(session, title, body=None, assignee=None, milestone=None, 
         print('Response:', r.content)
 
 
-app.run(host='0.0.0.0');
+#app.run(host='0.0.0.0');
