@@ -39,9 +39,14 @@ def paynoattention():
 @app.route('/report', methods=['POST'])
 def report():
     process_report(request.json, request.headers)
+    return "OK", 200
 
-def process_report(payload, headers):
-    print(headers["Label"])
+def process_report(payload, headers_pre):
+
+    # Keys in lowercase
+    headers = {k.lower(): v for k, v in headers_pre.items()}
+    print("Processing %s with headers %s .." % (payload, headers))
+
     # Create an authenticated session to create the issue
     session = requests.Session()
     session.auth = (USERNAME, PASSWORD)
@@ -65,22 +70,9 @@ def process_report(payload, headers):
     else:
         country = 'it'
 
-    # Assegna le label in base alle selezioni sul form "Iniziative"
-    if label == "iniziativa":
-        if "Natura" in list(payload):
-            if payload["Natura"] == "culturale-ricr":
-                label = "Attivita culturali e ricreative"
-            elif payload["Natura"] == "solidale":
-                label = "Servizi e iniziative solidali "
-                if "Tipo_di_soggetto" in list(payload):
-                    if payload["Tipo_di_soggetto"] == "privato":
-                        label += "private"
-                    else:
-                        label += "pubbliche"
-            elif payload["Natura"] == "didattica":
-                label = "Didattica a distanza e-learning"
-            elif payload["Natura"] == "sostegno-lavor":
-                label = "Sostegno lavoro e imprese"
+    location = False
+    location_geo = False
+    comment_body = None
 
     # Prepara il titolo dell'Issue
     if "Chi" in list(payload) and label == "Raccolte fondi":
@@ -96,74 +88,91 @@ def process_report(payload, headers):
     else:
         issue_title=label
 
-    # Se trovi riferimenti a psicologi o psicoterapeuti, 
-    #  aggiungi la label "Supporto Psicologico"
-    if "Titolo" in list(payload):
-        if "psicolog" in payload["Titolo"].lower() or "psicoter" in payload["Titolo"].lower():
-                labels.append("Supporto Psicologico")
-        else:
-            if "Descrizione" in list(payload):
-                if "psicolog" in payload["Descrizione"].lower() or "psicoter" in payload["Descrizione"].lower():
-                    labels.append("Supporto Psicologico")
-    
-    location = False
-    location_geo = False
-    comment_body = None
+    if country == "it":
+        # Assegna le label in base alle selezioni sul form "Iniziative"
+        if label == "iniziativa":
+            if "Natura" in list(payload):
+                if payload["Natura"] == "culturale-ricr":
+                    label = "Attivita culturali e ricreative"
+                elif payload["Natura"] == "solidale":
+                    label = "Servizi e iniziative solidali "
+                    if "Tipo_di_soggetto" in list(payload):
+                        if payload["Tipo_di_soggetto"] == "privato":
+                            label += "private"
+                        else:
+                            label += "pubbliche"
+                elif payload["Natura"] == "didattica":
+                    label = "Didattica a distanza e-learning"
+                elif payload["Natura"] == "sostegno-lavor":
+                    label = "Sostegno lavoro e imprese"
 
-    # Suggerisci una posizione
-    if "Indirizzo" not in list(payload) and "Posizione" not in list(payload):
-        location = False
+        # Se trovi riferimenti a psicologi o psicoterapeuti, 
+        #  aggiungi la label "Supporto Psicologico"
         if "Titolo" in list(payload):
-            location = extract_location(payload["Titolo"])
-        elif "Da_chi_offerta" in list(payload):
-            location = extract_location(payload["Da_chi_offerta"])
-        elif "Cosa" in list(payload) and not location:
-            location = extract_location(payload["Cosa"])
-        elif "Testo" in list(payload) and not location:
-            location = extract_location(payload["Testo"])
-        elif "Descrizione" in list(payload) and not location:
-            location = extract_location(payload["Descrizione"])
-
-    if "Indirizzo" in list(payload) and "Posizione" not in list(payload):
-        location_geo = None
-        tries = 0
-        while location_geo is None:
-            tries += 1
-            if tries < 10:
-                try:
-                    print("Getting coordinates. (%s)" % (tries))
-                    location_geo = geolocator.geocode(payload["Indirizzo"])
-                except:
-                    pass
+            if "psicolog" in payload["Titolo"].lower() or "psicoter" in payload["Titolo"].lower():
+                    labels.append("Supporto Psicologico")
             else:
-                location_geo = 0
-        if location_geo is not 0:
-            payload["Posizione"] = str(location_geo.latitude) +" "+str(location_geo.longitude)
+                if "Descrizione" in list(payload):
+                    if "psicolog" in payload["Descrizione"].lower() or "psicoter" in payload["Descrizione"].lower():
+                        labels.append("Supporto Psicologico")
 
-    if location_geo:
-        coords = payload["Posizione"].split(" ")
-        comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s (%s) come coordinate. Per favore, controlla <a href='https://nominatim.openstreetmap.org/search.php?q=%s+%s&polygon_geojson=1&viewbox='>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>." % (payload["Posizione"], payload["Indirizzo"], coords[0], coords[1])
-        comment_body = {
-            "body": comment_message
-        }
-        labels.append("Posizione da verificare")
+        # Suggerisci una posizione
+        if "Indirizzo" not in list(payload) and "Posizione" not in list(payload):
+            location = False
+            if "Titolo" in list(payload):
+                location = extract_location(payload["Titolo"])
+            elif "Da_chi_offerta" in list(payload):
+                location = extract_location(payload["Da_chi_offerta"])
+            elif "Cosa" in list(payload) and not location:
+                location = extract_location(payload["Cosa"])
+            elif "Testo" in list(payload) and not location:
+                location = extract_location(payload["Testo"])
+            elif "Descrizione" in list(payload) and not location:
+                location = extract_location(payload["Descrizione"])
 
-    # Commenta con il suggerimento
-    if location:
-        payload["Indirizzo"] = location[0]
-        coords = location[0].split(" ")
-        comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s (%s) come coordinate. Per favore, controlla <a href='https://nominatim.openstreetmap.org/search.php?q=%s+%s&polygon_geojson=1&viewbox='>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>." % (location[0], location[1], coords[0], coords[1])
-        comment_body = {
-            "body": comment_message
-        }
-        labels.append("Posizione da verificare")
+        if "Indirizzo_Via" in list(payload) and "Posizione" not in list(payload):
+            location_geo = None
+            tries = 0
+            while location_geo is None:
+                tries += 1
+                if tries < 10:
+                    try:
+                        print("Getting coordinates. (%s)" % (tries))
+                        location_geo = geolocator.geocode(payload["Indirizzo"])
+                    except:
+                        pass
+                else:
+                    location_geo = 0
+            if location_geo is not 0:
+                payload["Posizione"] = str(location_geo.latitude) +" "+str(location_geo.longitude)
+
+        if location_geo:
+            coords = payload["Posizione"].split(" ")
+            comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s (%s) come coordinate. Per favore, controlla <a href='https://nominatim.openstreetmap.org/search.php?q=%s+%s&polygon_geojson=1&viewbox='>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>." % (payload["Posizione"], payload["Indirizzo"], coords[0], coords[1])
+            comment_body = {
+                "body": comment_message
+            }
+            labels.append("Posizione da verificare")
+
+        # Commenta con il suggerimento
+        if location:
+            payload["Indirizzo"] = location[0]
+            coords = location[0].split(" ")
+            comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s (%s) come coordinate. Per favore, controlla <a href='https://nominatim.openstreetmap.org/search.php?q=%s+%s&polygon_geojson=1&viewbox='>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>." % (location[0], location[1], coords[0], coords[1])
+            comment_body = {
+                "body": comment_message
+            }
+            labels.append("Posizione da verificare")
 
     # Aggiungi label posizione mancante
     if "Posizione" not in list(payload) and not location and not location_geo:
-        labels.append("Posizione mancante")
+        if country == "it":
+            labels.append("Posizione mancante")
+        else:
+            labels.append("Missing position")
 
     # Aggiungi sempre la label "form" per le issue provenienti da questo script
-    labels.append("form")
+    #labels.append("form")
     # Aggiungi le label preparate
     labels.append(label)
 
@@ -179,7 +188,7 @@ def process_report(payload, headers):
     if comment_body:
         add_comment(session, url=comment_url, body=comment_body)
 
-    return "OK", 200
+    return
 
 def strip_meta(payload):
     excludelist = ["end", "start", "formhub/uuid", "meta/instanceID", "meta/deprecatedID", "Informativa"]
