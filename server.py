@@ -130,7 +130,7 @@ def process_report(payload, headers_pre):
             elif "Descrizione" in list(payload) and not location:
                 location = extract_location(payload["Descrizione"])
 
-        if "Indirizzo_Via" in list(payload) and "Posizione" not in list(payload):
+        if "location" in list(payload) and "Posizione" not in list(payload):
             location_geo = None
             tries = 0
             while location_geo is None:
@@ -138,17 +138,19 @@ def process_report(payload, headers_pre):
                 if tries < 10:
                     try:
                         print("Getting coordinates. (%s)" % (tries))
-                        location_geo = geolocator.geocode(payload["Indirizzo"])
+                        location_input = payload["location"]
+                        location_geo = geolocator.geocode(payload["location"])
                     except:
                         pass
                 else:
                     location_geo = 0
             if location_geo is not 0:
                 payload["Posizione"] = str(location_geo.latitude) +" "+str(location_geo.longitude)
+                payload.pop("location")
 
         if location_geo:
             coords = payload["Posizione"].split(" ")
-            comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s (%s) come coordinate. Per favore, controlla <a href='https://nominatim.openstreetmap.org/search.php?q=%s+%s&polygon_geojson=1&viewbox='>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>." % (payload["Posizione"], payload["Indirizzo"], coords[0], coords[1])
+            comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s (%s) come coordinate. Per favore, controlla <a href='https://nominatim.openstreetmap.org/search.php?q=%s+%s&polygon_geojson=1&viewbox='>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>." % (payload["Posizione"], location_input, coords[0], coords[1])
             comment_body = {
                 "body": comment_message
             }
@@ -156,7 +158,7 @@ def process_report(payload, headers_pre):
 
         # Commenta con il suggerimento
         if location:
-            payload["Indirizzo"] = location[0]
+            #payload["Indirizzo"] = location[0]
             coords = location[0].split(" ")
             comment_message = "Sembra che questa segnalazione non sia geolocalizzata. Ho automaticamente aggiunto %s (%s) come coordinate. Per favore, controlla <a href='https://nominatim.openstreetmap.org/search.php?q=%s+%s&polygon_geojson=1&viewbox='>qui</a> se sono corrette. In caso positivo, rimuovi pure la label 'Posizione da verificare' da questa Issue, altrimenti, procedi a correggere o rimuovere la posizione come spiegato <a href='https://github.com/emergenzeHack/covid19italia/wiki/Lavorare-sulle-segnalazioni#aggiungere-geolocalizzazione'>qui</a>." % (location[0], location[1], coords[0], coords[1])
             comment_body = {
@@ -172,7 +174,7 @@ def process_report(payload, headers_pre):
             labels.append("Missing position")
 
     # Aggiungi sempre la label "form" per le issue provenienti da questo script
-    #labels.append("form")
+    labels.append("form")
     # Aggiungi le label preparate
     labels.append(label)
 
@@ -248,4 +250,4 @@ def open_github_issue(session, title, body=None, assignee=None, milestone=None, 
         print('Response:', r.content)
 
 
-app.run(host='0.0.0.0');
+#app.run(host='0.0.0.0');
