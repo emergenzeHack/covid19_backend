@@ -181,6 +181,13 @@ def process_report(payload, headers_pre):
     # Rimuovi metavalori
     stripped_payload = strip_meta(payload)
 
+    blacklist = ["promozioniltaliane.com", "vuedc.info"]
+    
+    for word in blacklist:
+        for field in list(payload):
+            if word in payload[field]:
+                labels.append("spam")
+
     # Prepara il payload in YAML
     yaml_payload = "<pre><yamldata>\n"+yaml.dump(stripped_payload, allow_unicode=True)+"</yamldata></pre>"
 
@@ -250,4 +257,4 @@ def open_github_issue(session, title, body=None, assignee=None, milestone=None, 
         print('Response:', r.content)
 
 
-#app.run(host='0.0.0.0');
+app.run(host='0.0.0.0');
