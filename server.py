@@ -41,7 +41,7 @@ def report():
     process_report(request.json, request.headers)
     return "OK", 200
 
-def process_report(payload, headers_pre):
+def process_report(payload, headers_pre, additional_labels=[]):
 
     # Keys in lowercase
     headers = {k.lower(): v for k, v in headers_pre.items()}
@@ -178,11 +178,14 @@ def process_report(payload, headers_pre):
     # Aggiungi le label preparate
     labels.append(label)
 
+    for label in additional_labels:
+        labels.append(label)
+
     # Rimuovi metavalori
     stripped_payload = strip_meta(payload)
 
     blacklist = ["promozioniltaliane.com", "vuedc.info"]
-    
+
     for word in blacklist:
         for field in list(payload):
             if word in payload[field]:
