@@ -31,7 +31,6 @@ repo_names = {
     'gr': 'covid19gr_issues'
 }
 
-
 @app.route('/')
 def paynoattention():
     return 'Pay no attention to that man behind the curtain!'
@@ -42,8 +41,9 @@ def report():
     return "OK", 200
 
 def process_report(payload, headers_pre, additional_labels=[]):
-
-    # Keys in lowercase
+    print(payload)
+    # Key names to lowercase
+    # not sure why this is needed
     headers = {k.lower(): v for k, v in headers_pre.items()}
     print("Processing %s with headers %s .." % (payload, headers))
 
@@ -55,7 +55,7 @@ def process_report(payload, headers_pre, additional_labels=[]):
     #payload = request.json
 
     # Rimuovi nome gruppo dal nome delle chiavi
-    # e.g. datibancari/iban -> datibancari
+    # e.g. datibancari/IBAN -> datibancari
     for key_name in list(payload):
         if "datibancari/" in key_name:
             new_key_name = key_name.replace("datibancari/","")
@@ -65,6 +65,7 @@ def process_report(payload, headers_pre, additional_labels=[]):
     if 'label' in list(headers):
         label = headers['label']
 
+    # If country is not specified, IT is default
     if 'country' in list(headers):
         country = headers['country']
     else:
@@ -73,19 +74,22 @@ def process_report(payload, headers_pre, additional_labels=[]):
     location = False
     location_geo = False
     comment_body = None
+    issue_title = None
 
-    # Prepara il titolo dell'Issue
+    # Prepare the issue title
+    meaningful_fields = {
+        'it' : ["Titolo", "Cosa", "Testo", "Descrizione"],
+        'pt' : ["Nome", "Finalidade"]
+    }
+
+    for field in meaningful_fields[country]:
+        if field in list(payload):
+            issue_title=payload[field][0:100]
+
     if "Chi" in list(payload) and label == "Raccolte fondi":
         issue_title = "Raccolta fondi %s" % (payload["Chi"])
-    elif "Titolo" in list(payload):
-        issue_title=payload["Titolo"][0:100]
-    elif "Cosa" in list(payload):
-        issue_title=payload["Cosa"][0:100]
-    elif "Testo" in list(payload):
-        issue_title=payload["Testo"][0:100]
-    elif "Descrizione" in list(payload):
-        issue_title=payload["Descrizione"][0:100]
-    else:
+
+    if not issue_title:
         issue_title=label
 
     if country == "it":
@@ -166,8 +170,15 @@ def process_report(payload, headers_pre, additional_labels=[]):
             }
             labels.append("Posizione da verificare")
 
-    # Aggiungi label posizione mancante
-    if "Posizione" not in list(payload) and not location and not location_geo:
+    positionFound = None
+    positionLabels = ["Posizione", "location"]
+
+    for labelname in positionLabels:
+        # Aggiungi label posizione mancante
+        if labelname in list(payload):
+            positionFound = True
+
+    if not positionFound and not location and not location_geo:
         if country == "it":
             labels.append("Posizione mancante")
         else:
