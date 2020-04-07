@@ -79,7 +79,8 @@ def process_report(payload, headers_pre, additional_labels=[]):
     # Prepare the issue title
     meaningful_fields = {
         'it' : ["Titolo", "Cosa", "Testo", "Descrizione"],
-        'pt' : ["Nome", "Finalidade"]
+        'pt' : ["Nome", "Finalidade"],
+        'gr' : []
     }
 
     for field in meaningful_fields[country]:
