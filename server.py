@@ -172,7 +172,7 @@ def process_report(payload, headers_pre, additional_labels=[]):
             labels.append("Posizione da verificare")
 
     positionFound = None
-    positionLabels = ["Posizione", "location"]
+    positionLabels = ["Posizione", "location", "Indirizzo"]
 
     for labelname in positionLabels:
         # Aggiungi label posizione mancante
