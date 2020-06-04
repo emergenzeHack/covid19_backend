@@ -40,7 +40,7 @@ def report():
     process_report(request.json, request.headers)
     return "OK", 200
 
-def process_report(payload, headers_pre, additional_labels=[]):
+def process_report(payload, headers_pre, additional_labels=[],issue_title=None):
     print(payload)
     # Key names to lowercase
     # not sure why this is needed
@@ -74,24 +74,24 @@ def process_report(payload, headers_pre, additional_labels=[]):
     location = False
     location_geo = False
     comment_body = None
-    issue_title = None
+    
+    if issue_title == None:
+        # Prepare the issue title
+        meaningful_fields = {
+            'it' : ["Titolo", "Cosa", "Testo", "Descrizione"],
+            'pt' : ["Nome", "Finalidade"],
+            'gr' : []
+        }
 
-    # Prepare the issue title
-    meaningful_fields = {
-        'it' : ["Titolo", "Cosa", "Testo", "Descrizione"],
-        'pt' : ["Nome", "Finalidade"],
-        'gr' : []
-    }
+        for field in meaningful_fields[country]:
+            if field in list(payload):
+                issue_title=payload[field][0:100]
 
-    for field in meaningful_fields[country]:
-        if field in list(payload):
-            issue_title=payload[field][0:100]
+        if "Chi" in list(payload) and label == "Raccolte fondi":
+            issue_title = "Raccolta fondi %s" % (payload["Chi"])
 
-    if "Chi" in list(payload) and label == "Raccolte fondi":
-        issue_title = "Raccolta fondi %s" % (payload["Chi"])
-
-    if not issue_title:
-        issue_title=label
+        if not issue_title:
+            issue_title=label
 
     if country == "it":
         # Assegna le label in base alle selezioni sul form "Iniziative"
@@ -186,7 +186,7 @@ def process_report(payload, headers_pre, additional_labels=[]):
             labels.append("Missing position")
 
     # Aggiungi sempre la label "form" per le issue provenienti da questo script
-    labels.append("form")
+    #labels.append("form")
     # Aggiungi le label preparate
     labels.append(label)
 
@@ -272,4 +272,4 @@ def open_github_issue(session, title, body=None, assignee=None, milestone=None, 
         print('Response:', r.content)
 
 
-app.run(host='0.0.0.0');
+#app.run(host='0.0.0.0');
